@@ -31,7 +31,7 @@ namespace PicAnalyzer
         {
             // Dynamically create components from yaml
             // Parse yaml and create data objects
-            ComponentGenerator cg = new ComponentGenerator(groupBox1);
+            ComponentGenerator cg = new ComponentGenerator(groupBox2);
             // find default YAML file
             string assetsDir = Path.Combine(Environment.CurrentDirectory, "assets", "config.yaml");
             // parse default YAML file

@@ -50,7 +50,7 @@ namespace PicAnalyzer
 
         public void CreateControls()
         {
-            int currentHeight = 6;
+            int currentHeight = 21;
             for (int i = 0; i < yamlControls.Count; i++)
             {
                 switch (yamlControls[i].type)
@@ -59,19 +59,19 @@ namespace PicAnalyzer
                         CheckBox cb = CreateCheckBox(yamlControls[i]);
                         cb.Location = new Point(6, currentHeight);
                         parent.Controls.Add(cb);
-                        currentHeight += cb.Size.Height;
+                        currentHeight += cb.Size.Height + 6;
                         break;
                     case "radiobutton":
                         GroupBox gb = CreateRadioControl(yamlControls[i]);
                         gb.Location = new Point(6, currentHeight);
                         parent.Controls.Add(gb);
-                        currentHeight += gb.Size.Height;
+                        currentHeight += gb.Size.Height + 6;
                         break;
                     case "textfield":
                         TextBox tb = CreateTextBox(yamlControls[i]);
                         tb.Location = new Point(6, currentHeight);
                         parent.Controls.Add(tb);
-                        currentHeight += tb.Size.Height;
+                        currentHeight += tb.Size.Height + 6;
                         break;
                     default:
                         break;
@@ -120,7 +120,7 @@ namespace PicAnalyzer
             };
 
             // then, add a list of radiobutton controls starting at height 3
-            int currentHeight = 3;
+            int currentHeight = 21;
             for (int i = 0; i < comp.options.Count; i++)
             {
                 RadioButton btn = new RadioButton
@@ -133,7 +133,7 @@ namespace PicAnalyzer
                     Text = comp.options[i].title,
                     UseVisualStyleBackColor = true
                 };
-                currentHeight += 3;
+                currentHeight += 23;
                 container.Controls.Add(btn);
             }
             

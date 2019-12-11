@@ -51,6 +51,7 @@
             this.CommentTextBox = new System.Windows.Forms.TextBox();
             this.CommentLabel = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.Fixations.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.imageBox)).BeginInit();
             this.menuStrip.SuspendLayout();
@@ -274,10 +275,21 @@
             this.groupBox1.Controls.Add(this.PersonPresent);
             this.groupBox1.Location = new System.Drawing.Point(904, 27);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(177, 635);
+            this.groupBox1.Size = new System.Drawing.Size(177, 299);
             this.groupBox1.TabIndex = 18;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Data Entry";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox2.Location = new System.Drawing.Point(904, 332);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(177, 299);
+            this.groupBox2.TabIndex = 19;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Data Entry";
             // 
             // PicAnalyzer
             // 
@@ -285,6 +297,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
             this.ClientSize = new System.Drawing.Size(1093, 671);
+            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.imageBox);
             this.Controls.Add(this.PreviousButton);
@@ -331,6 +344,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem exportVideoFramesToolStripMenuItem;
+        private System.Windows.Forms.GroupBox groupBox2;
     }
     }
 
