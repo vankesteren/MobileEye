@@ -17,7 +17,7 @@ namespace PicAnalyzer
                     if (PreviousButton.Enabled) PreviousButton_Click_1(this, EventArgs.Empty);
                     return true;
                 case Keys.D1:
-                    // do something...
+                    // something
                     return true;
                 default:
                     return base.ProcessCmdKey(ref msg, keyData);

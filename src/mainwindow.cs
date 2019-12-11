@@ -26,10 +26,18 @@ namespace PicAnalyzer
             MinimumSize = new System.Drawing.Size(1000, 800); // set minimum size of window
         }
 
-        // On loading of mainwindow
+        // On loading of mainwindow: dynamic component generation
         private void MainWindow_Load(object sender, EventArgs e)
         {
-            // Do nothing
+            // Dynamically create components from yaml
+            // Parse yaml and create data objects
+            ComponentGenerator cg = new ComponentGenerator(groupBox1);
+            // find default YAML file
+            string assetsDir = Path.Combine(Environment.CurrentDirectory, "assets", "config.yaml");
+            // parse default YAML file
+            cg.ParseYamlFile(assetsDir);
+            // create the controls to add to the data entry box
+            cg.CreateControls();
         }
 
 
