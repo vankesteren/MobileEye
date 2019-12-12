@@ -31,16 +31,36 @@ namespace PicAnalyzer
             public string title { get; set; }
             public string name { get; set; }
             public int key { get; set; }
-            public List<RadioOption> options { get; set; }
-        }
+            public List<YamlControl> options { get; set; }
 
-        public class RadioOption
-        {
-            public string title { get; set; }
-            public string name { get; set; }
-            public int key { get; set; }
+            public Keys getKey()
+            {
+                switch (key)
+                {
+                    case 1:
+                        return Keys.D1;
+                    case 2:
+                        return Keys.D2;
+                    case 3:
+                        return Keys.D3;
+                    case 4:
+                        return Keys.D4;
+                    case 5:
+                        return Keys.D5;
+                    case 6:
+                        return Keys.D6;
+                    case 7:
+                        return Keys.D7;
+                    case 8:
+                        return Keys.D8;
+                    case 9:
+                        return Keys.D9;
+                    default:
+                        return Keys.Attn; // placeholder key
+                }
+            }
         }
-
+        
         public void ParseYamlFile(string yamlPath)
         {
             yaml = File.ReadAllText(yamlPath);
@@ -140,17 +160,44 @@ namespace PicAnalyzer
             return container;
         }
 
-        public void AddControlsToGroupBox(GroupBox box, Control.ControlCollection controls)
+        public void RegisterShortcuts(Dictionary<Keys, Action> shortcuts)
         {
-            // top margin = 3, height = 17, between margin = 6
-            int currentHeight = 3;
-            for (int i = 0; i < controls.Count; i++)
+            for (int i = 0; i < yamlControls.Count; i++)
             {
-                var ctrl = controls[i];
-                ctrl.Location = new Point(6, currentHeight);
-                box.Controls.Add(ctrl);
-                currentHeight += ctrl.Size.Height;
+                switch (yamlControls[i].type)
+                {
+                    case "checkbox":
+                        string cbname = yamlControls[i].name;
+                        shortcuts[yamlControls[i].getKey()] = () =>
+                        {
+                            CheckBox cb = parent.Controls.Find(cbname, true)[0] as CheckBox;
+                            cb.Checked = !cb.Checked;
+                        };
+                        break;
+                    case "radiobutton":
+                        for (int j = 0; j < yamlControls[i].options.Count; j++)
+                        {
+                            string rbname = yamlControls[i].options[j].name;
+                            shortcuts[yamlControls[i].options[j].getKey()] = () =>
+                            {
+                                RadioButton rb = parent.Controls.Find(rbname, true)[0] as RadioButton;
+                                rb.Checked = true;
+                            };
+                        }
+                        break;
+                    case "textfield":
+                        string tfname = yamlControls[i].name;
+                        shortcuts[yamlControls[i].getKey()] = () =>
+                        {
+                            TextBox tb = parent.Controls.Find(tfname, true)[0] as TextBox;
+                            tb.Focus();
+                        };
+                        break;
+                    default:
+                        break;
+                }
             }
+            
         }
     }
 }

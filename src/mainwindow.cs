@@ -18,7 +18,7 @@ namespace PicAnalyzer
         private string currentImage;
         private string subName = string.Empty;
         private int counter = 0;
-
+        
         // constructor
         public PicAnalyzer()
         {
@@ -29,6 +29,8 @@ namespace PicAnalyzer
         // On loading of mainwindow: dynamic component generation
         private void MainWindow_Load(object sender, EventArgs e)
         {
+            // Register the default shortcuts
+            RegisterDefaultShortcuts();
             // Dynamically create components from yaml
             // Parse yaml and create data objects
             ComponentGenerator cg = new ComponentGenerator(groupBox2);
@@ -38,6 +40,8 @@ namespace PicAnalyzer
             cg.ParseYamlFile(assetsDir);
             // create the controls to add to the data entry box
             cg.CreateControls();
+            // add the shortcuts
+            cg.RegisterShortcuts(shortKeys);
         }
 
 
@@ -69,20 +73,30 @@ namespace PicAnalyzer
 
         // On-screen buttons
         // button 2 = next image
-        private void NextButton_Click_1(object sender, EventArgs e)
+        private void NextButton_Click()
         {
             SaveDataRow();
             counter = counter + 1;
             if (dataRows.Count > counter) LoadDataRow();
             UpdateImage();
         }
+        private void NextButton_Click_1(object sender, EventArgs e)
+        {
+            NextButton_Click();
+        }
+
+
 
         // button 4: load previous image and erase previously added row in datarows
-        private void PreviousButton_Click_1(object sender, EventArgs e)
+        private void PreviousButton_Click()
         {
             counter = counter - 1;
             LoadDataRow();
             UpdateImage();
+        }
+        private void PreviousButton_Click_1(object sender, EventArgs e)
+        {
+            PreviousButton_Click();
         }
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
