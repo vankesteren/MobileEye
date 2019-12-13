@@ -8,21 +8,16 @@ using YamlDotNet.Serialization;
 
 namespace PicAnalyzer
 {
-    public class ComponentGenerator
+    public class BoundControls
     {
         private GroupBox parent;
         private string yaml;
         private List<YamlControl> yamlControls;
 
-        public ComponentGenerator(GroupBox Parent)
+        public BoundControls(GroupBox Parent)
         {
             // constructor
             parent = Parent;
-        }
-
-        public class ParsedYaml
-        {
-            public List<YamlControl> controls { get; set; }
         }
 
         public class YamlControl
@@ -33,7 +28,7 @@ namespace PicAnalyzer
             public int key { get; set; }
             public List<YamlControl> options { get; set; }
 
-            public Keys getKey()
+            public Keys GetKey()
             {
                 switch (key)
                 {
@@ -56,11 +51,11 @@ namespace PicAnalyzer
                     case 9:
                         return Keys.D9;
                     default:
-                        return Keys.Attn; // placeholder key
+                        return Keys.Attn; // placeholder key, not used
                 }
             }
         }
-        
+
         public void ParseYamlFile(string yamlPath)
         {
             yaml = File.ReadAllText(yamlPath);
@@ -68,6 +63,8 @@ namespace PicAnalyzer
             yamlControls = deserializer.Deserialize<List<YamlControl>>(yaml);
         }
 
+
+        // Control creation
         public void CreateControls()
         {
             int currentHeight = 21;
@@ -102,11 +99,10 @@ namespace PicAnalyzer
         private CheckBox CreateCheckBox(YamlControl comp)
         {
             CheckBox cbx = new CheckBox();
-            cbx.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
+            cbx.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             cbx.AutoSize = true;
             cbx.BackColor = SystemColors.ControlLightLight;
             cbx.ForeColor = SystemColors.ActiveCaptionText;
-            // cbx.Location = new System.Drawing.Point(6, 19); THIS NEEDS TO BE SET DYNAMICALLY
             cbx.Name = comp.name;
             cbx.Size = new Size(97, 17);
             cbx.Text = comp.title;
@@ -118,8 +114,7 @@ namespace PicAnalyzer
         {
             TextBox tbx = new TextBox
             {
-                Anchor = (AnchorStyles.Top | AnchorStyles.Right),
-                // tbx.Location = new System.Drawing.Point(6, 185);
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
                 Multiline = true,
                 Name = comp.name,
                 Size = new System.Drawing.Size(165, 103)
@@ -131,7 +126,7 @@ namespace PicAnalyzer
         {
             GroupBox container = new GroupBox
             {
-                Anchor = (AnchorStyles.Top | AnchorStyles.Right),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
                 Size = new System.Drawing.Size(165, 32),
                 AutoSize = true,
                 Name = comp.name,
@@ -156,7 +151,7 @@ namespace PicAnalyzer
                 currentHeight += 23;
                 container.Controls.Add(btn);
             }
-            
+
             return container;
         }
 
@@ -168,7 +163,7 @@ namespace PicAnalyzer
                 {
                     case "checkbox":
                         string cbname = yamlControls[i].name;
-                        shortcuts[yamlControls[i].getKey()] = () =>
+                        shortcuts[yamlControls[i].GetKey()] = () =>
                         {
                             CheckBox cb = parent.Controls.Find(cbname, true)[0] as CheckBox;
                             cb.Checked = !cb.Checked;
@@ -178,7 +173,7 @@ namespace PicAnalyzer
                         for (int j = 0; j < yamlControls[i].options.Count; j++)
                         {
                             string rbname = yamlControls[i].options[j].name;
-                            shortcuts[yamlControls[i].options[j].getKey()] = () =>
+                            shortcuts[yamlControls[i].options[j].GetKey()] = () =>
                             {
                                 RadioButton rb = parent.Controls.Find(rbname, true)[0] as RadioButton;
                                 rb.Checked = true;
@@ -187,7 +182,7 @@ namespace PicAnalyzer
                         break;
                     case "textfield":
                         string tfname = yamlControls[i].name;
-                        shortcuts[yamlControls[i].getKey()] = () =>
+                        shortcuts[yamlControls[i].GetKey()] = () =>
                         {
                             TextBox tb = parent.Controls.Find(tfname, true)[0] as TextBox;
                             tb.Focus();
@@ -195,9 +190,80 @@ namespace PicAnalyzer
                         break;
                     default:
                         break;
+                };
+            }
+        }
+
+        // Get and set data from the UI elements
+        public Dictionary<string, object> GetData()
+        {
+            Dictionary<string, object> dict = new Dictionary<string, object>();
+            for (int i = 0; i < yamlControls.Count; i++)
+            {
+                switch (yamlControls[i].type)
+                {
+                    case "checkbox":
+                        string cbname = yamlControls[i].name;
+                        CheckBox cb = parent.Controls.Find(cbname, true)[0] as CheckBox;
+                        dict.Add(cbname, cb.Checked ? 1 : 0);
+                        break;
+                    case "radiobutton":
+                        string gbname = yamlControls[i].name;
+                        for (int j = 0; j < yamlControls[i].options.Count; j++)
+                        {
+                            string rbname = yamlControls[i].options[j].name;
+                            RadioButton rb = parent.Controls.Find(rbname, true)[0] as RadioButton;
+                            if (rb.Checked)
+                            {
+                                dict.Add(gbname, rbname);
+                            }
+                        }
+                        break;
+                    case "textfield":
+                        string tfname = yamlControls[i].name;
+                        TextBox tb = parent.Controls.Find(tfname, true)[0] as TextBox;
+                        dict.Add(tfname, tb.Text);
+                        break;
+                    default:
+                        break;
                 }
             }
-            
+            return dict;
+        }
+
+        public void SetData(Dictionary<string, object> Data)
+        {
+            foreach (string key in Data.Keys)
+            {
+                Control ctrl = parent.Controls.Find(key, true)[0];
+                string type = ctrl.GetType().ToString();
+                switch (ctrl.GetType().ToString())
+                {
+                    case "System.Windows.Forms.CheckBox":
+                        (ctrl as CheckBox).Checked = (int)Data[key] == 1;
+                        break;
+                    case "System.Windows.Forms.TextBox":
+                        ctrl.Text = Data[key].ToString();
+                        break;
+                    case "System.Windows.Forms.GroupBox":
+                        RadioButton rbtn = ctrl.Controls.Find(Data[key].ToString(), true)[0] as RadioButton;
+                        rbtn.Checked = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        public string[] GetNames()
+        {
+            int n = yamlControls.Count;
+            string[] names = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                names[i] = yamlControls[i].name;
+            }
+            return names;
         }
     }
 }

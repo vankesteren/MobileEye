@@ -15,6 +15,7 @@ namespace PicAnalyzer
         private int[] stateVersion = { 1, 0 }; // major, minor
         private List<DataRow> dataRows;
         private ImageReference imgRef;
+        private BoundControls bdCtrls;
         private string currentImage;
         private string subName = string.Empty;
         private int counter = 0;
@@ -33,15 +34,15 @@ namespace PicAnalyzer
             RegisterDefaultShortcuts();
             // Dynamically create components from yaml
             // Parse yaml and create data objects
-            ComponentGenerator cg = new ComponentGenerator(groupBox2);
+            bdCtrls = new BoundControls(groupBox2);
             // find default YAML file
             string assetsDir = Path.Combine(Environment.CurrentDirectory, "assets", "config.yaml");
             // parse default YAML file
-            cg.ParseYamlFile(assetsDir);
+            bdCtrls.ParseYamlFile(assetsDir);
             // create the controls to add to the data entry box
-            cg.CreateControls();
+            bdCtrls.CreateControls();
             // add the shortcuts
-            cg.RegisterShortcuts(shortKeys);
+            bdCtrls.RegisterShortcuts(shortKeys);
         }
 
 
@@ -90,6 +91,7 @@ namespace PicAnalyzer
         // button 4: load previous image and erase previously added row in datarows
         private void PreviousButton_Click()
         {
+            SaveDataRow();
             counter = counter - 1;
             LoadDataRow();
             UpdateImage();
@@ -137,8 +139,7 @@ namespace PicAnalyzer
             dataRows = new List<DataRow>(imgRef.count);
             UpdateImage();
         }
-
-        // overload for event-driven loading of files
+        
         protected void LoadFiles(object sender, EventArgs e)
         {
             LoadFiles();
@@ -146,28 +147,15 @@ namespace PicAnalyzer
 
         protected void SaveDataRow()
         {
-            DataRow data = new DataRow(
-                SubName:                subName,
-                ImageName:              currentImage,
-                personPresent:          PersonPresent.Checked,
-                headFixated:            HeadFixation.Checked,
-                bodyFixated:            BodyFixation.Checked,
-                surroundingsFixated:    SurroundingFixation.Checked,
-                noFixation:             InvalidFixation.Checked,
-                Comment:                CommentTextBox.Text
-            );
-            dataRows.Insert(counter, data);
+            Dictionary<string, object> data = bdCtrls.GetData();
+            DataRow dr = new DataRow(subName, data);
+            dataRows.Insert(counter, dr);
         }
 
         protected void LoadDataRow()
         {
-            DataRow data = dataRows[counter];
-            PersonPresent.Checked       = data.personPresent;
-            HeadFixation.Checked        = data.headFixated;
-            BodyFixation.Checked        = data.bodyFixated;
-            SurroundingFixation.Checked = data.surroundingsFixated;
-            InvalidFixation.Checked     = data.noFixation;
-            CommentTextBox.Text         = data.Comment;
+            DataRow dr = dataRows[counter];
+            bdCtrls.SetData(dr.Data);
         }
 
         protected void RemoveDataRow()
@@ -178,11 +166,23 @@ namespace PicAnalyzer
         protected void ExportToCSV()
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Subject;Image;Person;Head;Surroundings;Body;Fixation;Comment");
+            // basic colnames
+            sb.Append("Subject;")
+            // data-bound colnames
+            string[] colnames = bdCtrls.GetNames();
+            foreach (string name in colnames)
+            {
+                sb.Append(name).Append(";");
+            }
+            sb.Append(Environment.NewLine);
+
+            // then append a line for data
             foreach (DataRow row in dataRows)
             {
                 sb.AppendLine(row.getAllCommaSeperated());
             }
+
+            // save
             SaveFileDialog sf = new SaveFileDialog
             {
                 FileName = subName,
