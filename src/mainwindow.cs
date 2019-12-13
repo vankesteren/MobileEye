@@ -34,7 +34,7 @@ namespace PicAnalyzer
             RegisterDefaultShortcuts();
             // Dynamically create components from yaml
             // Parse yaml and create data objects
-            bdCtrls = new BoundControls(groupBox2);
+            bdCtrls = new BoundControls(dataBox);
             // find default YAML file
             string assetsDir = Path.Combine(Environment.CurrentDirectory, "assets", "config.yaml");
             // parse default YAML file
@@ -139,7 +139,6 @@ namespace PicAnalyzer
             dataRows = new List<DataRow>(imgRef.count);
             UpdateImage();
         }
-        
         protected void LoadFiles(object sender, EventArgs e)
         {
             LoadFiles();
@@ -167,7 +166,7 @@ namespace PicAnalyzer
         {
             StringBuilder sb = new StringBuilder();
             // basic colnames
-            sb.Append("Subject;")
+            sb.Append("Subject;");
             // data-bound colnames
             string[] colnames = bdCtrls.GetNames();
             foreach (string name in colnames)
