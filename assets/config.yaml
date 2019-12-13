@@ -24,7 +24,7 @@
       key: 5
 
 # textfields result in a string column
-- type: textfield
-  title: Comment
-  name: comment
-  key: 6
+# - type: textfield
+#   title: Comment
+#   name: comment
+#   key: 6

@@ -10,8 +10,8 @@ namespace PicAnalyzer
 {
     public class BoundControls
     {
+        public string yaml;
         private GroupBox parent;
-        private string yaml;
         private List<YamlControl> yamlControls;
 
         public BoundControls(GroupBox Parent)
@@ -56,9 +56,13 @@ namespace PicAnalyzer
             }
         }
 
-        public void ParseYamlFile(string yamlPath)
+        public void LoadYamlFile(string yamlPath)
         {
             yaml = File.ReadAllText(yamlPath);
+        }
+
+        public void ParseYaml()
+        {
             IDeserializer deserializer = new DeserializerBuilder().Build();
             yamlControls = deserializer.Deserialize<List<YamlControl>>(yaml);
         }
@@ -99,7 +103,7 @@ namespace PicAnalyzer
         private CheckBox CreateCheckBox(YamlControl comp)
         {
             CheckBox cbx = new CheckBox();
-            cbx.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            cbx.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             cbx.AutoSize = true;
             cbx.BackColor = SystemColors.ControlLightLight;
             cbx.ForeColor = SystemColors.ActiveCaptionText;
@@ -114,7 +118,7 @@ namespace PicAnalyzer
         {
             TextBox tbx = new TextBox
             {
-                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left,
                 Multiline = true,
                 Name = comp.name,
                 Size = new System.Drawing.Size(165, 103)
@@ -126,7 +130,7 @@ namespace PicAnalyzer
         {
             GroupBox container = new GroupBox
             {
-                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left,
                 Size = new System.Drawing.Size(165, 32),
                 AutoSize = true,
                 Name = comp.name,
@@ -252,6 +256,15 @@ namespace PicAnalyzer
                     default:
                         break;
                 }
+            }
+        }
+
+        public void RemoveControls()
+        {
+            foreach (YamlControl obj in yamlControls)
+            {
+                Control ctrl = parent.Controls.Find(obj.name, true)[0];
+                ctrl.Dispose();
             }
         }
 

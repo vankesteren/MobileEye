@@ -62,7 +62,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\ComponentGenerator.cs" />
+    <Compile Include="src\BoundControls.cs" />
     <Compile Include="src\DataRow.cs" />
     <Compile Include="src\KeyBoardShortcuts.cs">
       <SubType>Form</SubType>
