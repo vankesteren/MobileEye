@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using System.ComponentModel;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using Emgu.CV.CvEnum;
 using WK.Libraries.BetterFolderBrowserNS;
 
 namespace FrameCoder
@@ -19,17 +20,20 @@ namespace FrameCoder
         public VideoSplitter(string srcFile)
         {
             InitializeComponent();
-            SplitConfig = new VideoSplitConfig(0, 100, srcFile, Path.GetTempPath());
-            Cap = new VideoCapture(SplitConfig.SourceFile);
-            SplitConfig.FrameCount = (int)Cap.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameCount);
-            startFrameControl.Maximum = new decimal(SplitConfig.FrameCount);
-            nFramesControl.Maximum = new decimal(SplitConfig.FrameCount);
-            Cap.SetCaptureProperty(Emgu.CV.CvEnum.CapProp.PosFrames, 0);
-            FirstFrame.Image = Cap.QuerySmallFrame();
-            Frames = new string[SplitConfig.NFrames];
-            FrameNums = new int[SplitConfig.NFrames];
+            SplitConfig = new VideoSplitConfig(srcFile);
 
-            // background worker stuff
+            // parse video properties (better use ffprobe?)
+            Cap = new VideoCapture(SplitConfig.SourceFile);
+            SplitConfig.SourceFrameCount = (int)Cap.GetCaptureProperty(CapProp.FrameCount);
+            SplitConfig.SourceFPS = (int)Cap.GetCaptureProperty(CapProp.Fps);
+
+            // update UI based on video properties
+            startFrameControl.Maximum = new decimal(SplitConfig.SourceFrameCount);
+            nFramesControl.Maximum = new decimal(SplitConfig.SourceFrameCount);
+            Cap.SetCaptureProperty(CapProp.PosFrames, 0);
+            FirstFrame.Image = Cap.QuerySmallFrame();
+
+            // Init background worker for the conversion
             Worker.WorkerReportsProgress = true;
             Worker.WorkerSupportsCancellation = true;
             Worker.DoWork += Worker_DoWork;
@@ -38,21 +42,43 @@ namespace FrameCoder
 
         public class VideoSplitConfig
         {
-            public int StartFrame { get; set; }
-            public int NFrames { get; set; }
-            public int FrameCount { get; set; }
+            // User-specified settings
+            public UserPreference UserPref { get; set; }
+            public int UserStartFrame { get; set; }
+            public int UserEndFrame { get; set; }
+            public int UserTimeInterval { get; set; }
+            public int UserFrameInterval { get; set; }
+            public int UserNFrames { get; set; }
+            public string UserTargetFolder { get; set; }
+
+            // How to process the user settings to get frameidx
+            public enum UserPreference
+            {
+                NFrames,
+                TimeInterval,
+                FrameInterval
+            }
+
+            // Source properties
             public string SourceFile { get; set; }
-            public string TempFolder { get; set; }
-            public string TargetFolder { get; set; }
+            public int SourceFrameCount { get; set; }
+            public double SourceFPS { get; set; }
+
+            // Other properties
             public string Format { get; set; }
 
-            public VideoSplitConfig(int StartFrame, int NFrames, string SourceFile, string TempFolder)
+            // constructor
+            public VideoSplitConfig(string SourceFile)
             {
-                this.StartFrame = StartFrame;
-                this.NFrames = NFrames;
-                this.SourceFile = SourceFile;
-                this.TempFolder = TempFolder;
                 Format = ".jpg";
+                this.SourceFile = SourceFile;
+            }
+
+            // the magical method!
+            public int[] GetFrameIDX()
+            {
+                // TODO
+                return new int[] { 1, 2, 3, 4, 5 };
             }
         }
 
@@ -70,24 +96,25 @@ namespace FrameCoder
 
         public string GetFolder()
         {
-            return SplitConfig.TargetFolder;
+            return SplitConfig.UserTargetFolder;
         }
 
         private void GetFramesFromVideo()
         {
-            Frames = new string[SplitConfig.NFrames];
-            FrameNums = new int[SplitConfig.NFrames];
-            int width = SplitConfig.FrameCount.ToString().Length;
-            int stride = (SplitConfig.FrameCount - SplitConfig.StartFrame) / SplitConfig.NFrames;
-            for (int i = 0; i < SplitConfig.NFrames; i++)
+            // TODO: work with SplitConfig.GetFrameIDX();
+            Frames = new string[SplitConfig.UserNFrames];
+            FrameNums = new int[SplitConfig.UserNFrames];
+            int width = SplitConfig.SourceFrameCount.ToString().Length;
+            int stride = (SplitConfig.SourceFrameCount - SplitConfig.UserStartFrame) / SplitConfig.UserNFrames;
+            for (int i = 0; i < SplitConfig.UserNFrames; i++)
             {
-                int framenum = i * stride + SplitConfig.StartFrame;
-                Cap.SetCaptureProperty(Emgu.CV.CvEnum.CapProp.PosFrames, framenum);
+                int framenum = i * stride + SplitConfig.UserStartFrame;
+                Cap.SetCaptureProperty(CapProp.PosFrames, framenum);
                 Mat frame = Cap.QueryFrame();
-                LoadFrameInWindow(frame, SplitConfig.NFrames, i);
-                if (SplitConfig.TargetFolder == null) break;
+                LoadFrameInWindow(frame, SplitConfig.UserNFrames, i);
+                if (SplitConfig.UserTargetFolder == null) break;
                 string imagename = Path.Combine(
-                    SplitConfig.TargetFolder,
+                    SplitConfig.UserTargetFolder,
                     (framenum + 1).ToString().PadLeft(width, "0"[0]) + SplitConfig.Format
                 );
                 Frames[i] = imagename;
@@ -144,9 +171,17 @@ namespace FrameCoder
             };
             if (bfb.ShowDialog() == DialogResult.OK)
             {
-                SplitConfig.TargetFolder = bfb.SelectedPath;
-                SplitConfig.NFrames = (int)nFramesControl.Value;
-                SplitConfig.StartFrame = (int)startFrameControl.Value - 1;
+                // Update SplitConfig user settings
+                // TODO: allow different settings
+                SplitConfig.UserTargetFolder = bfb.SelectedPath;
+                SplitConfig.UserPref = VideoSplitConfig.UserPreference.NFrames;
+                SplitConfig.UserNFrames = (int)nFramesControl.Value;
+                SplitConfig.UserStartFrame = (int)startFrameControl.Value - 1;
+                // SplitConfig.UserEndFrame = (int)endFrameControl.Value - 1;
+                // SplitConfig.UserFrameInterval = (int)frameIntervalControl.Value;
+                // SplitConfig.UserTimeInterval = (int)timeIntervalControl.Value;
+
+                // Do the conversion!
                 UseWaitCursor = true;
                 if (Worker.IsBusy)
                 {
@@ -158,9 +193,9 @@ namespace FrameCoder
 
         private void startFrameControl_ValueChanged(object sender, EventArgs e)
         {
-            Cap.SetCaptureProperty(Emgu.CV.CvEnum.CapProp.PosFrames, (int)startFrameControl.Value - 1);
+            Cap.SetCaptureProperty(CapProp.PosFrames, (int)startFrameControl.Value - 1);
             FirstFrame.Image = Cap.QuerySmallFrame();
-            int maxframes = SplitConfig.FrameCount + 1 - (int)startFrameControl.Value;
+            int maxframes = SplitConfig.SourceFrameCount + 1 - (int)startFrameControl.Value;
             nFramesControl.Maximum = new decimal(maxframes);
         }
 
@@ -170,7 +205,7 @@ namespace FrameCoder
             {
                 Worker.CancelAsync();
             }
-            SplitConfig.TargetFolder = null;
+            SplitConfig.UserTargetFolder = null;
         }
     }
 }
