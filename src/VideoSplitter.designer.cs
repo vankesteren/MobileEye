@@ -65,14 +65,14 @@
             // 
             this.FirstFrame.Location = new System.Drawing.Point(12, 28);
             this.FirstFrame.Name = "FirstFrame";
-            this.FirstFrame.Size = new System.Drawing.Size(150, 100);
+            this.FirstFrame.Size = new System.Drawing.Size(148, 99);
             this.FirstFrame.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.FirstFrame.TabIndex = 2;
             this.FirstFrame.TabStop = false;
             // 
             // startFrameControl
             // 
-            this.startFrameControl.Location = new System.Drawing.Point(78, 27);
+            this.startFrameControl.Location = new System.Drawing.Point(78, 23);
             this.startFrameControl.Minimum = new decimal(new int[] {
             1,
             0,
@@ -91,7 +91,7 @@
             // startFrameLabel
             // 
             this.startFrameLabel.AutoSize = true;
-            this.startFrameLabel.Location = new System.Drawing.Point(14, 29);
+            this.startFrameLabel.Location = new System.Drawing.Point(14, 25);
             this.startFrameLabel.Name = "startFrameLabel";
             this.startFrameLabel.Size = new System.Drawing.Size(61, 13);
             this.startFrameLabel.TabIndex = 6;
@@ -139,7 +139,7 @@
             // 
             // endFrameControl
             // 
-            this.endFrameControl.Location = new System.Drawing.Point(78, 54);
+            this.endFrameControl.Location = new System.Drawing.Point(78, 50);
             this.endFrameControl.Minimum = new decimal(new int[] {
             1,
             0,
@@ -153,11 +153,12 @@
             0,
             0,
             0});
+            this.endFrameControl.ValueChanged += new System.EventHandler(this.endFrameControl_ValueChanged);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(14, 56);
+            this.label2.Location = new System.Drawing.Point(14, 52);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(58, 13);
             this.label2.TabIndex = 11;
@@ -298,9 +299,9 @@
             // 
             // LastFrame
             // 
-            this.LastFrame.Location = new System.Drawing.Point(161, 28);
+            this.LastFrame.Location = new System.Drawing.Point(164, 28);
             this.LastFrame.Name = "LastFrame";
-            this.LastFrame.Size = new System.Drawing.Size(150, 100);
+            this.LastFrame.Size = new System.Drawing.Size(148, 99);
             this.LastFrame.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.LastFrame.TabIndex = 3;
             this.LastFrame.TabStop = false;
@@ -310,9 +311,9 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(12, 9);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(72, 13);
+            this.label1.Size = new System.Drawing.Size(61, 13);
             this.label1.TabIndex = 11;
-            this.label1.Text = "Starting frame";
+            this.label1.Text = "Start Frame";
             // 
             // currentFrameLabel
             // 

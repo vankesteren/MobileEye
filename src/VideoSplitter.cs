@@ -257,14 +257,6 @@ namespace FrameCoder
             }
         }
 
-        private void startFrameControl_ValueChanged(object sender, EventArgs e)
-        {
-            Cap.SetCaptureProperty(CapProp.PosFrames, (int)startFrameControl.Value - 1);
-            FirstFrame.Image = Cap.QuerySmallFrame();
-            int maxframes = SplitConfig.SourceFrameCount + 1 - (int)startFrameControl.Value;
-            nFramesControl.Maximum = new decimal(maxframes);
-        }
-
         private void cancelButton_Click(object sender, EventArgs e)
         {
             if (Worker.IsBusy)
@@ -272,6 +264,31 @@ namespace FrameCoder
                 Worker.CancelAsync();
             }
             SplitConfig.UserTargetFolder = null;
+        }
+
+        private void startFrameControl_ValueChanged(object sender, EventArgs e)
+        {
+            Cap.SetCaptureProperty(CapProp.PosFrames, (int)startFrameControl.Value - 1);
+            FirstFrame.Image = Cap.QuerySmallFrame();
+            int maxframes = (int)endFrameControl.Value - (int)startFrameControl.Value;
+            
+            // set maxima
+            nFramesControl.Maximum = new decimal(maxframes);
+            frameIntervalControl.Maximum = new decimal(maxframes);
+            timeIntervalControl.Maximum = new decimal(1000 * maxframes / SplitConfig.SourceFPS);
+        }
+
+        private void endFrameControl_ValueChanged(object sender, EventArgs e)
+        {
+            Cap.SetCaptureProperty(CapProp.PosFrames, (int)endFrameControl.Value - 1);
+            LastFrame.Image = Cap.QuerySmallFrame();
+            SetFrameLabelText("End Frame");
+            int maxframes = (int)endFrameControl.Value - (int)startFrameControl.Value;
+
+            // set maxima
+            nFramesControl.Maximum = new decimal(maxframes);
+            frameIntervalControl.Maximum = new decimal(maxframes);
+            timeIntervalControl.Maximum = new decimal(1000 * maxframes / SplitConfig.SourceFPS);
         }
     }
 }
